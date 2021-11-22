@@ -10,9 +10,15 @@ MENU = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_
 
 pygame.font.init()
 
+TITULO = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_titulo.png")), (WIDTH, HEIGHT))
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hundir la flota")
 
+def draw_titulo(boton_continuar):
+    WIN.blit(TITULO, (0,0))
+    if boton_continuar: WIN.blit(BOTON_CONTINUAR, CONTINUAR_COORDS)
+
+    pygame.display.update()
 
 def draw_titulo(boton_continuar):
     WIN.blit(TITULO, (0,0))
@@ -64,6 +70,34 @@ def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, 
 
     pygame.display.update()
 
+def titulo():
+    continuar = pygame.Rect(CONTINUAR_COORDS, CONTINUAR_DIM)
+
+    clock = pygame.time.Clock()
+    titulo = True
+    pressed = False
+    boton_continuar = False
+
+    while titulo: # bucle principal menú
+        clock.tick(FPS)
+        boton_continuar = False
+
+        pos = pygame.mouse.get_pos() # da la posición del puntero
+        if continuar.collidepoint(pos):
+            boton_continuar = True
+            if pressed == True:
+                titulo = False
+        pressed = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    pressed = True
+
+        draw_titulo(boton_continuar)
 
 def barco_correcto(cuadrados_verdes, len_barco, boats):
     casilla_1 = cuadrados_verdes[0]
@@ -234,5 +268,6 @@ def main():
 if __name__ == "__main__":
     titulo()
     while True:
+        
         menu()
         main()
