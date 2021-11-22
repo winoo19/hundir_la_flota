@@ -5,10 +5,15 @@ import os
 FPS = 60
 GAMEBOARD = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "battleship_board.png")), (WIDTH, HEIGHT))
 MENU = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_menu.png")), (WIDTH, HEIGHT))
-
+TITULO = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_titulo.png")), (WIDTH, HEIGHT))
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hundir la flota")
 
+def draw_titulo(boton_continuar):
+    WIN.blit(TITULO, (0,0))
+    if boton_continuar: WIN.blit(BOTON_CONTINUAR, CONTINUAR_COORDS)
+
+    pygame.display.update()
 
 def draw_menu(boton_iniciar, boton_cargar, boton_guardar, boton_salir):
     WIN.blit(MENU, (0,0))
@@ -27,6 +32,34 @@ def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes):
         WIN.blit(PRESSED_SQUARE, coord_cuadrado)
     pygame.display.update()
 
+def titulo():
+    continuar = pygame.Rect(CONTINUAR_COORDS, CONTINUAR_DIM)
+
+    clock = pygame.time.Clock()
+    titulo = True
+    pressed = False
+    boton_continuar = False
+
+    while titulo: # bucle principal menú
+        clock.tick(FPS)
+        boton_continuar = False
+
+        pos = pygame.mouse.get_pos() # da la posición del puntero
+        if continuar.collidepoint(pos):
+            boton_continuar = True
+            if pressed == True:
+                titulo = False
+        pressed = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    pressed = True
+
+        draw_titulo(boton_continuar)
 
 def menu():
     iniciar = pygame.Rect(INICIAR_COORDS, BOTON_DIM)
@@ -118,14 +151,13 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game = False
-
-        if len(cuadrados_verdes) == 3:
-            cuadrados_verdes = [cuadrados_verdes[-1]]
         
         draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes) # paso a la función dibujar tablero la posición del cuadrado verde
 
 
 if __name__ == "__main__":
+    titulo()
     while True:
+        
         menu()
         main()
