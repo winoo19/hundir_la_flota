@@ -1,24 +1,16 @@
-from typing import Text
 import pygame
 from constants import *
 import os
 
 FPS = 60
 TITULO = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_titulo.png")), (WIDTH, HEIGHT))
-GAMEBOARD = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "battleship_board.png")), (WIDTH, HEIGHT))
+OPTIONS = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_options.png")), (WIDTH, HEIGHT))
 MENU = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_menu.png")), (WIDTH, HEIGHT))
+GAMEBOARD = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "battleship_board.png")), (WIDTH, HEIGHT))
 
-pygame.font.init()
-
-TITULO = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "fondo_titulo.png")), (WIDTH, HEIGHT))
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Hundir la flota")
 
-def draw_titulo(boton_continuar):
-    WIN.blit(TITULO, (0,0))
-    if boton_continuar: WIN.blit(BOTON_CONTINUAR, CONTINUAR_COORDS)
-
-    pygame.display.update()
 
 def draw_titulo(boton_continuar):
     WIN.blit(TITULO, (0,0))
@@ -37,11 +29,35 @@ def draw_menu(boton_iniciar, boton_cargar, boton_guardar, boton_salir):
     pygame.display.update()
 
 
+def draw_options(cuadricula, cantidad_barcos, jugar):
+    WIN.blit(OPTIONS, (0,0))
+
+    if cuadricula == 16:
+        WIN.blit(BOTON_CUAD_16, CUAD_16_COORDS)
+    elif cuadricula == 10:
+        WIN.blit(BOTON_CUAD_10, CUAD_10_COORDS)
+
+    if cantidad_barcos == 2:
+        WIN.blit(BOTON_BARCOS_2, BOTON_BARCOS_2_COORDS)
+    elif cantidad_barcos == 3:
+        WIN.blit(BOTON_BARCOS_3, BOTON_BARCOS_3_COORDS)
+    elif cantidad_barcos == 4:
+        WIN.blit(BOTON_BARCOS_4, BOTON_BARCOS_4_COORDS)
+    elif cantidad_barcos == 5:
+        WIN.blit(BOTON_BARCOS_5, BOTON_BARCOS_5_COORDS) 
+
+    if jugar:
+        WIN.blit(BOTON_JUGAR, BOTON_JUGAR_COORDS)
+
+    pygame.display.update()
+
+
 def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, len_barco):
     WIN.blit(GAMEBOARD, (0,0))
     WIN.blit(PRESSED_SQUARE, (pressed_square_x, pressed_square_y)) # cuadrado verde
-    for coord_cuadrado in cuadrados_verdes: # pongo un cuadrado verde sobre los cuadrados en los que se ha hecho click
-        WIN.blit(PRESSED_SQUARE, coord_cuadrado)
+    if len_barco != 8:
+        for coord_cuadrado in cuadrados_verdes: # pongo un cuadrado verde sobre los cuadrados en los que se ha hecho click
+            WIN.blit(PRESSED_SQUARE, coord_cuadrado)
     for boat in boats:
         if boat[0][0] == boat[1][0]:
             vertical = True
@@ -64,40 +80,8 @@ def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, 
                 else:
                     WIN.blit(SPRITE_H_M, boat[num])
 
-    if len_barco < 7:
-        text = pygame.font.SysFont("timesnewroman", 40).render(f"Coloque el barco de dimensión {len_barco}", 1, BLACK)
-        WIN.blit(text, (WIDTH//2 - text.get_width()//2, 40))
-
     pygame.display.update()
 
-def titulo():
-    continuar = pygame.Rect(CONTINUAR_COORDS, CONTINUAR_DIM)
-
-    clock = pygame.time.Clock()
-    titulo = True
-    pressed = False
-    boton_continuar = False
-
-    while titulo: # bucle principal menú
-        clock.tick(FPS)
-        boton_continuar = False
-
-        pos = pygame.mouse.get_pos() # da la posición del puntero
-        if continuar.collidepoint(pos):
-            boton_continuar = True
-            if pressed == True:
-                titulo = False
-        pressed = False
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    pressed = True
-
-        draw_titulo(boton_continuar)
 
 def barco_correcto(cuadrados_verdes, len_barco, boats):
     casilla_1 = cuadrados_verdes[0]
@@ -204,7 +188,74 @@ def menu():
         draw_menu(boton_iniciar, boton_cargar, boton_guardar, boton_salir)
 
 
-def main():
+def options():
+    cuadricula_16 = pygame.Rect(CUAD_16_COORDS, BOTON_CUAD_DIM)
+    cuadricula_10 = pygame.Rect(CUAD_10_COORDS, BOTON_CUAD_DIM)
+    barcos_2 = pygame.Rect(BOTON_BARCOS_2_COORDS, BOTON_BARCOS_DIM)
+    barcos_3 = pygame.Rect(BOTON_BARCOS_3_COORDS, BOTON_BARCOS_DIM)
+    barcos_4 = pygame.Rect(BOTON_BARCOS_4_COORDS, BOTON_BARCOS_DIM)
+    barcos_5 = pygame.Rect(BOTON_BARCOS_5_COORDS, BOTON_BARCOS_DIM)
+    jugar = pygame.Rect(BOTON_JUGAR_COORDS, BOTON_JUGAR_DIM)
+
+    clock = pygame.time.Clock()
+    options = True
+    pressed = False
+
+    cuadricula = cantidad_barcos = 0
+    cuadricula_pressed = cantidad_barcos_pressed = jugar_on_top = False
+
+    while options:
+        clock.tick(FPS)
+
+        if not cuadricula_pressed: cuadricula = 0
+        if not cantidad_barcos_pressed: cantidad_barcos = 0
+        jugar_on_top = False
+
+        pos = pygame.mouse.get_pos()
+        if cuadricula_16.collidepoint(pos) and not cuadricula_pressed:
+            cuadricula = 16
+            if pressed:
+                cuadricula_pressed = True
+        elif cuadricula_10.collidepoint(pos) and not cuadricula_pressed:
+            cuadricula = 10
+            if pressed:
+                cuadricula_pressed = True
+        elif barcos_2.collidepoint(pos) and not cantidad_barcos_pressed:
+            cantidad_barcos = 2
+            if pressed:
+                cantidad_barcos_pressed = True
+        elif barcos_3.collidepoint(pos) and not cantidad_barcos_pressed:
+            cantidad_barcos = 3
+            if pressed:
+                cantidad_barcos_pressed = True
+        elif barcos_4.collidepoint(pos) and not cantidad_barcos_pressed:
+            cantidad_barcos = 4
+            if pressed:
+                cantidad_barcos_pressed = True
+        elif barcos_5.collidepoint(pos) and not cantidad_barcos_pressed:
+            cantidad_barcos = 5
+            if pressed:
+                cantidad_barcos_pressed = True
+        elif jugar.collidepoint(pos) and cantidad_barcos_pressed and cuadricula_pressed:
+            jugar_on_top = True
+            if pressed:
+                options = False
+
+        pressed = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    pressed = True
+
+        draw_options(cuadricula, cantidad_barcos, jugar_on_top)
+    
+    return cuadricula, cantidad_barcos
+
+
+def main(cuadricula, cantidad_barcos):
 
     # creo en una lista rectángulos = a los cuadraditos del tablero 1
     squares_1 = [pygame.Rect((SQUARE_SIZE*(2+num_1), SQUARE_SIZE*(5+num_2)), (SQUARE_SIZE, SQUARE_SIZE))
@@ -219,8 +270,9 @@ def main():
     clock = pygame.time.Clock()
     cuadrados_verdes = []
     boats = []
-    cond1 = False
     len_barco = 2
+    turno_1 = True
+    turno_2 = False
     
     while game: # bucle principal juego
         clock.tick(FPS)
@@ -228,19 +280,33 @@ def main():
         pressed_square_x, pressed_square_y = -100, -100 # pongo el cuadrado verde fuera de la pantalla
         pos = pygame.mouse.get_pos() # da la posición del puntero
 
-        for square in squares_1: # compruebo todos los cuadrados en el tablero 1
-            if square.collidepoint(pos): # si el puntero está encima del cuadrado, cambio las coord del cuadrado verde
-                pressed_square_x, pressed_square_y = square.left, square.top
-                if pressed == True: # si se hace click, añado a la lista cuadrados_verdes las coord del cuadrado en el que se hace click
-                    if (square.left, square.top) not in cuadrados_verdes:
-                        cuadrados_verdes.append((square.left, square.top))
-        
-        for square in squares_2: # hago lo mismo con el tablero 2
-            if square.collidepoint(pos):
-                pressed_square_x, pressed_square_y = square.left, square.top
-                if pressed == True:
-                    if (square.left, square.top) not in cuadrados_verdes:
-                        cuadrados_verdes.append((square.left, square.top))
+        if len_barco == 7:
+            pygame.time.delay(5000)
+            if turno_1:
+                turno_1, turno_2 = False, True
+                boats_player_1 = boats
+                print(boats_player_1)
+                boats, len_barco = [], 2
+            else:
+                turno_1, turno_2 = True, False
+                boats_player_2 = boats
+                print(boats_player_2)
+                boats, len_barco = [], 8
+
+        if turno_1:
+            for square in squares_1: # compruebo todos los cuadrados en el tablero 1
+                if square.collidepoint(pos): # si el puntero está encima del cuadrado, cambio las coord del cuadrado verde
+                    pressed_square_x, pressed_square_y = square.left, square.top
+                    if pressed == True: # si se hace click, añado a la lista cuadrados_verdes las coord del cuadrado en el que se hace click
+                        if (square.left, square.top) not in cuadrados_verdes:
+                            cuadrados_verdes.append((square.left, square.top))
+        elif turno_2:
+            for square in squares_2: # hago lo mismo con el tablero 2
+                if square.collidepoint(pos):
+                    pressed_square_x, pressed_square_y = square.left, square.top
+                    if pressed == True:
+                        if (square.left, square.top) not in cuadrados_verdes:
+                            cuadrados_verdes.append((square.left, square.top))
 
         pressed = False
 
@@ -256,10 +322,14 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     game = False
 
-        if len(cuadrados_verdes) == 2 and len_barco < 7:
-            if barco_correcto(cuadrados_verdes, len_barco, boats):
-                boats.append(barco_correcto(cuadrados_verdes, len_barco, boats))
-                len_barco += 1
+        if len_barco < 7:
+            if len(cuadrados_verdes) == 2:
+                if barco_correcto(cuadrados_verdes, len_barco, boats):
+                    boats.append(barco_correcto(cuadrados_verdes, len_barco, boats))
+                    len_barco += 1
+                cuadrados_verdes = []
+        else:
+            ataque = cuadrados_verdes
             cuadrados_verdes = []
         
         draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, len_barco)
@@ -268,6 +338,6 @@ def main():
 if __name__ == "__main__":
     titulo()
     while True:
-        
         menu()
-        main()
+        option = options()
+        main(option[0], option[1])
