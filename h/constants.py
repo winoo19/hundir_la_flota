@@ -31,6 +31,9 @@ BOTON_BARCOS_DIM = (36,47)
 BOTON_JUGAR_COORDS = (484,572.25)
 BOTON_JUGAR_DIM = (109,47)
 
+
+TEXTO_COORDS = (WIDTH//2- 945/2, 20)
+TEXTO_DIM = (945,36)
 # imagenes
 BOTON_CONTINUAR = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "boton_continuar.png")), CONTINUAR_DIM)
 
@@ -57,4 +60,13 @@ SPRITE_V_I = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "
 SPRITE_V_M = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "hundido_v_m.png")), AREA_SQUARE)
 SPRITE_V_F = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "hundido_v_d.png")), AREA_SQUARE)
 
+TEXTO_BARCO_2 = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "texto_2.png")), TEXTO_DIM)
+TEXTO_BARCO_3 = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "texto_3.png")), TEXTO_DIM)
+TEXTO_BARCO_4 = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "texto_4.png")), TEXTO_DIM)
+TEXTO_BARCO_5 = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "texto_5.png")), TEXTO_DIM)
+TEXTO_BARCO_6 = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "texto_6.png")), TEXTO_DIM)
+
 PRESSED_SQUARE = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "casilla.png")), (SQUARE_SIZE, SQUARE_SIZE))
+
+CASILLA_AGUA = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "casilla_agua.png")), (SQUARE_SIZE, SQUARE_SIZE))
+CASILLA_TOCADO = pygame.transform.scale(pygame.image.load(os.path.join("imagenes", "casilla_tocado.png")), (SQUARE_SIZE, SQUARE_SIZE))

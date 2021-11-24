@@ -52,33 +52,68 @@ def draw_options(cuadricula, cantidad_barcos, jugar):
     pygame.display.update()
 
 
-def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, len_barco):
+def draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, len_barco,
+ cantidad_barcos, ataque, resultado, casillas_agua, casillas_tocado, barcos_hundidos_1, barcos_hundidos_2,
+ boats_player_1, boats_player_2):
+    dict_barco = {2:TEXTO_BARCO_2, 3:TEXTO_BARCO_3, 4:TEXTO_BARCO_4, 5:TEXTO_BARCO_5, 6:TEXTO_BARCO_6}
     WIN.blit(GAMEBOARD, (0,0))
     WIN.blit(PRESSED_SQUARE, (pressed_square_x, pressed_square_y)) # cuadrado verde
     if len_barco != 8:
         for coord_cuadrado in cuadrados_verdes: # pongo un cuadrado verde sobre los cuadrados en los que se ha hecho click
             WIN.blit(PRESSED_SQUARE, coord_cuadrado)
-    for boat in boats:
-        if boat[0][0] == boat[1][0]:
-            vertical = True
-        else:
-            vertical = False
-
-        for num in range(len(boat)):
-            if vertical:
-                if num == 0:
-                    WIN.blit(SPRITE_V_I, boat[num])
-                elif num == len(boat)-1:
-                    WIN.blit(SPRITE_V_F, boat[num])
-                else:
-                    WIN.blit(SPRITE_V_M, boat[num])
+        if len_barco < cantidad_barcos+2:
+            WIN.blit(dict_barco[len_barco], TEXTO_COORDS)
+    
+        for boat in boats:
+            if boat[0][0] == boat[1][0]:
+                vertical = True
             else:
-                if num == 0:
-                    WIN.blit(SPRITE_H_I, boat[num])
-                elif num == len(boat)-1:
-                    WIN.blit(SPRITE_H_F, boat[num])
+                vertical = False
+
+            for num in range(len(boat)):
+                if vertical:
+                    if num == 0:
+                        WIN.blit(SPRITE_V_I, boat[num])
+                    elif num == len(boat)-1:
+                        WIN.blit(SPRITE_V_F, boat[num])
+                    else:
+                        WIN.blit(SPRITE_V_M, boat[num])
                 else:
-                    WIN.blit(SPRITE_H_M, boat[num])
+                    if num == 0:
+                        WIN.blit(SPRITE_H_I, boat[num])
+                    elif num == len(boat)-1:
+                        WIN.blit(SPRITE_H_F, boat[num])
+                    else:
+                        WIN.blit(SPRITE_H_M, boat[num])
+    else:
+        for numero in range(len(casillas_agua)):
+            WIN.blit(CASILLA_AGUA, casillas_agua[numero])
+        for numero in range(len(casillas_tocado)):
+            WIN.blit(CASILLA_TOCADO, casillas_tocado[numero])
+        
+        for numero in barcos_hundidos_1:
+            print(numero)
+            print(boats_player_1)
+            if boats_player_1[numero][0][0] == boats_player_1[numero][1][0]:
+                vertical = True
+            else:
+                vertical = False
+
+            for num in range(len(boats_player_1[numero])):
+                if vertical:
+                    if num == 0:
+                        WIN.blit(SPRITE_V_I, boats_player_1[numero][num])
+                    elif num == len(boats_player_1[numero])-1:
+                        WIN.blit(SPRITE_V_F, boats_player_1[numero][num])
+                    else:
+                        WIN.blit(SPRITE_V_M, boats_player_1[numero][num])
+                else:
+                    if num == 0:
+                        WIN.blit(SPRITE_H_I, boats_player_1[numero][num])
+                    elif num == len(boats_player_1[numero])-1:
+                        WIN.blit(SPRITE_H_F, boats_player_1[numero][num])
+                    else:
+                        WIN.blit(SPRITE_H_M, boats_player_1[numero][num])        
 
     pygame.display.update()
 
@@ -271,29 +306,38 @@ def main(cuadricula, cantidad_barcos):
     cuadrados_verdes = []
     boats = []
     len_barco = 2
-    turno_1 = True
-    turno_2 = False
-    
+    boats_player_2 = []
+    boats_player_1 = []
+    ataque = []
+    ataque1 = []
+    ataque2 = []
+    turno_1, turno_2 = True, False
+    resultado = ""
+    casillas_agua = []
+    casillas_tocado = []
+    barcos_hundidos_1 = []
+    barcos_hundidos_2 = []
+
     while game: # bucle principal juego
         clock.tick(FPS)
-
+        
         pressed_square_x, pressed_square_y = -100, -100 # pongo el cuadrado verde fuera de la pantalla
         pos = pygame.mouse.get_pos() # da la posición del puntero
 
-        if len_barco == 7:
-            pygame.time.delay(5000)
+        if len_barco == cantidad_barcos+2:
+            pygame.time.delay(1000)
             if turno_1:
                 turno_1, turno_2 = False, True
                 boats_player_1 = boats
-                print(boats_player_1)
+                restantes_1 = boats_player_1
                 boats, len_barco = [], 2
             else:
-                turno_1, turno_2 = True, False
                 boats_player_2 = boats
-                print(boats_player_2)
+                restantes_2 = boats_player_2
                 boats, len_barco = [], 8
 
         if turno_1:
+            
             for square in squares_1: # compruebo todos los cuadrados en el tablero 1
                 if square.collidepoint(pos): # si el puntero está encima del cuadrado, cambio las coord del cuadrado verde
                     pressed_square_x, pressed_square_y = square.left, square.top
@@ -307,7 +351,6 @@ def main(cuadricula, cantidad_barcos):
                     if pressed == True:
                         if (square.left, square.top) not in cuadrados_verdes:
                             cuadrados_verdes.append((square.left, square.top))
-
         pressed = False
 
         for event in pygame.event.get():
@@ -322,17 +365,69 @@ def main(cuadricula, cantidad_barcos):
                 if event.key == pygame.K_ESCAPE:
                     game = False
 
-        if len_barco < 7:
+        if len_barco < cantidad_barcos+2:
             if len(cuadrados_verdes) == 2:
                 if barco_correcto(cuadrados_verdes, len_barco, boats):
                     boats.append(barco_correcto(cuadrados_verdes, len_barco, boats))
                     len_barco += 1
                 cuadrados_verdes = []
-        else:
-            ataque = cuadrados_verdes
+
+        elif turno_1 and cuadrados_verdes not in ataque1:
+            if cuadrados_verdes:
+                ataque = cuadrados_verdes[0]
+                ataque1.append(ataque)
+                resultado = "a"
+                print("esto es el turno 1: ", ataque)
+                print(boats_player_1)
+                for i in range(len(restantes_1)):
+                    if ataque in restantes_1[i]:
+                        restantes_1[i].remove(ataque)
+                        if not restantes_1[i]:
+                            if not restantes_1: # victoria
+                                pass
+                            else:
+                                resultado = "h"
+                                barcos_hundidos_1.append(i)
+                        else:
+                            resultado = "t"
+                if resultado == "a":
+                    casillas_agua.append(ataque)
+                if resultado == "t":
+                    casillas_tocado.append(ataque)
+                turno_1 = not turno_1
+                turno_2 = not turno_2
             cuadrados_verdes = []
+
+        elif turno_2 and cuadrados_verdes not in ataque2:
+            if cuadrados_verdes:
+                ataque = cuadrados_verdes[0]
+                print("esto es el turno 2:", ataque)
+                print(boats_player_2)
+                ataque2.append(ataque)
+                resultado = "a"
+                for i in range(len((restantes_2))):
+                    if ataque in restantes_2[i]:
+                        restantes_2[i].remove(ataque)
+                        if not restantes_2[i]:
+                            if not restantes_2: # victoria
+                                pass
+                            else:
+                                resultado = "h"
+                                barcos_hundidos_2.append(i)
+                        else:
+                            resultado = "t"
+                if resultado == "a":
+                    casillas_agua.append(ataque)
+                if resultado == "t":
+                    casillas_tocado.append(ataque)
+                turno_1 = not turno_1
+                turno_2 = not turno_2
+            cuadrados_verdes = []
+
         
-        draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes, boats, len_barco)
+        draw_gameboard(pressed_square_x, pressed_square_y, cuadrados_verdes,
+                        boats, len_barco, cantidad_barcos, ataque, resultado, casillas_agua,
+                         casillas_tocado, barcos_hundidos_1, barcos_hundidos_2, boats_player_1, boats_player_2)
 
 
 if __name__ == "__main__":
